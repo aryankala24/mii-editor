@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Mii Creator</title>
+  <link rel="icon" type="image/svg+xml" href="mii-icon.svg">
+
+  <meta name="format-detection" content="telephone=no">
+
+  <meta name="csrf-token"
+    content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3N0dWRpby5taWkubmludGVuZG8uY29tIiwic3ViIjoiM2JlNWRkNTI0MTkwY2NiYyIsImV4cCI6MTgxNTExMTc5OCwiaWF0IjoxNzUyMDM5Nzk4LCJ0eXAiOiJjc3JmX3Rva2VuIn0.zUGe1cT90SvZWJP9dtPG2A2tAoHl2AZlDvaTGKg9j8s">
+
+
+  <meta name="client-id" content="f2503ae55136cd57">
+
+
+
+
+  <link rel="dns-prefetch" href="mii-studio.akamaized.net">
+  <link rel="preconnect" href="https://mii-studio.akamaized.net">
+  <link rel="stylesheet" href="https://mii-studio.akamaized.net/static/css/app.bfec8792873bac507220.css">
+</head>
+
+<body data-page-id="mii-new" data-language="en-GB" data-params=""
+  data-image-base="https://mii-studio.akamaized.net/editor/1">
+  <div id="editor"></div>
+  <script src="https://mii-studio.akamaized.net/static/js/editor.pc.46056ea432a4ef3974af.js"></script>
+
+  <div class="o-modal c-error-modal" id="modal-error">
+    <div class="o-modal__overlay"></div>
+    <div class="o-modal__container c-error-modal__container">
+      <div class="c-error-modal__content">
+        <div class="c-lead">
+          <p>An error has occurred. Please try again later.</p>
+        </div>
+        <div class="c-error-modal__action">
+          <a href="#" class="o-modal__close c-error-modal__btn c-error-modal__btn--primary">
+            OK
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="https://mii-studio.akamaized.net/static/js/app.0b7411b6de157ee2fea7.js"></script>
+  <script src="https://mii-studio.akamaized.net/static/jssdk/nintendo-jssdk-client.3.0.2.js"></script>
+  <script>
+    NASessionManager = (function () {
+      return {
+        connectOrigin: "https://accounts.nintendo.com",
+        apiOrigin: "https://api.accounts.nintendo.com",
+        clientId: "1cfe3a55ed8924d9",
+        origin: "https://studio.mii.nintendo.com",
+        sessionStateCookieName: "NASS",
+        initialize: function (callback) {
+          document.addEventListener("nintendoReady", callback);
+
+          ninAcc.init({
+            connectOrigin: this.connectOrigin,
+            apiOrigin: this.apiOrigin,
+            clientId: this.clientId,
+            clientOrigin: this.origin,
+            responseType: ["token"],
+            scope: []
+          });
+        },
+
+        loadSessionState: function () {
+
+          var cookies = document.cookie.split('; ').map(function (pair) {
+            return pair.split("=", 2);
+          }).reduce(function (iv, cur) {
+            if (cur[0].length > 0) iv[decodeURIComponent(cur[0])] = decodeURIComponent(cur[1]);
+            return iv;
+          }, {});
+
+          return cookies[this.sessionStateCookieName];
+        },
+
+        subscribeSessionStateChangeEvent: function (sessionState, onChanged) {
+          ninAcc.oauth.checkSessionState(sessionState).then(function (result) {
+            if (result.status === 'changed') {
+              onChanged();
+              return;
+            }
+            ninAcc.event.subscribe('oauth.sessionStateChange', { "sessionState": sessionState }, function (error, result) {
+              if (error) {
+                return;
+              }
+              if (result.status === "changed") {
+                onChanged();
+              }
+            });
+          });
+        }
+      };
+    })();
+
+    NASessionManager.initialize(function () {
+      function logoutUri() {
+        return "/logout?client_id=f2503ae55136cd57\u0026csrf_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3N0dWRpby5taWkubmludGVuZG8uY29tIiwic3ViIjoiM2JlNWRkNTI0MTkwY2NiYyIsImV4cCI6MTgxNTExMTc5OCwiaWF0IjoxNzUyMDM5Nzk4LCJ0eXAiOiJjc3JmX3Rva2VuIn0.zUGe1cT90SvZWJP9dtPG2A2tAoHl2AZlDvaTGKg9j8s\u0026post_logout_redirect_uri=https%3A%2F%2Faccounts.nintendo.com%2Fmii_studio%2Fcallback%3Ferror%3Dentry_required%26error_description%3DNA%2Buser%2Bis%2Binconsistent%2Bwith%2BStudio%26state%3DR0%255Dr7almkQb2.1752036202";
+      }
+
+      function onChangedSessionState() {
+        document.location.href = logoutUri();
+      }
+
+      var sessionState = NASessionManager.loadSessionState();
+      NASessionManager.subscribeSessionStateChangeEvent(sessionState, function () {
+        onChangedSessionState();
+      });
+    });
+
+  </script>
+</body>
+
+</html>
